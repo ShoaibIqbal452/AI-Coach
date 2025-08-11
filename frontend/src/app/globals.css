@@ -1,0 +1,97 @@
+/* Base styles - minimal since Material UI handles most styling */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Custom variables for use with Material UI */
+:root {
+  /* These variables can be used for custom styling when needed */
+  --page-padding: 1.5rem;
+  --card-border-radius: 8px;
+  --section-spacing: 2rem;
+}
+
+/* Layout classes */
+.page-container {
+  padding: var(--page-padding);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.auth-form-container {
+  max-width: 450px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.form-field-spacing {
+  margin-bottom: 1.5rem;
+}
+
+/* Utility classes */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
+button:hover {
+  background-color: var(--primary-700);
+}
+
+/* Error message styling */
+.error-message {
+  color: var(--error);
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}

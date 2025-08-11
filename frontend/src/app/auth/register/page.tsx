@@ -1,0 +1,168 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { API_ENDPOINTS } from '@/config/constants';
+import Link from 'next/link';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Typography, 
+  Box, 
+  Alert, 
+  Container, 
+  Divider,
+  Link as MuiLink
+} from '@mui/material';
+
+export default function RegisterPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Registration failed');
+      }
+      
+      router.push('/auth/login?registered=true');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred during registration');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Container maxWidth="sm" sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', py: 4 }}>
+      <Card sx={{ width: '100%', boxShadow: 2 }}>
+        <CardHeader 
+          title={
+            <Typography variant="h5" component="h1" align="center" color="primary" fontWeight="bold">
+              AI Gym Coach
+            </Typography>
+          }
+          subheader={
+            <Typography variant="subtitle1" align="center">
+              Create a new account
+            </Typography>
+          }
+          sx={{ borderBottom: 1, borderColor: 'divider', pb: 2 }}
+        />
+        <CardContent sx={{ pt: 3 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <Input
+              label="Username"
+              type="text"
+              name="username"
+              placeholder="Choose a username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <Input
+              label="Email"
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <Input
+              label="Confirm Password"
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              fullWidth
+              sx={{ mb: 3 }}
+            />
+            <Button 
+              type="submit" 
+              fullWidth
+              isLoading={isLoading}
+              variant="default"
+              color="primary"
+            >
+              Sign Up
+            </Button>
+          </Box>
+        </CardContent>
+        <Divider />
+        <Box sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Already have an account?{' '}
+            <MuiLink component={Link} href="/auth/login" color="primary" fontWeight="medium">
+              Sign in
+            </MuiLink>
+          </Typography>
+        </Box>
+      </Card>
+    </Container>
+  );
+}

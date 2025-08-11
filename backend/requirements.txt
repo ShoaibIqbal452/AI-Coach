@@ -3,7 +3,9 @@ uvicorn
 python-dotenv
 sqlalchemy
 psycopg2-binary
-openai
+openai>=1.0.0
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic
+python-multipart
+email-validator
