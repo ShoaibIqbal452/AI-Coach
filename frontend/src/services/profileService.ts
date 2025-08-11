@@ -4,22 +4,32 @@ const API_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1`;
 
 export const profileService = {
   async getProfile(token: string): Promise<UserProfile> {
-    const response = await fetch(`${API_URL}/profiles/me`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await fetch(`${API_URL}/profiles/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (!response.ok) {
-      if (response.status === 404) {
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('Profile not found (404), returning empty profile');
+          return {};
+        }
+        const errorText = await response.text();
+        throw new Error(`Error fetching profile: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Profile service error:', error);
+      if (error instanceof Error && error.message.includes('404')) {
         return {};
       }
-      throw new Error(`Error fetching profile: ${response.statusText}`);
+      throw error;
     }
-
-    return await response.json();
   },
 
   async createProfile(token: string, profileData: UserProfile): Promise<UserProfile> {

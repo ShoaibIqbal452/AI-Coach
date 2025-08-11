@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from app.db.session import SessionLocal
+from fastapi.responses import JSONResponse
+from app.utils.json_encoder import DateTimeEncoder
+import json
 from app.schemas.progress import ProgressCreate, ProgressResponse, ProgressList, ProgressUpdate
 from app.services.progress_service import (
     create_progress_entry, 
@@ -87,7 +90,10 @@ async def analyze_user_progress(
             detail=analysis_result["message"]
         )
     
-    return analysis_result
+    # Use JSONResponse with custom encoder to handle datetime objects
+    return JSONResponse(
+        content=json.loads(json.dumps(analysis_result, cls=DateTimeEncoder))
+    )
 
 @router.post("/adaptive-plan", status_code=status.HTTP_201_CREATED)
 async def create_adaptive_plan(
@@ -218,7 +224,10 @@ async def analyze_user_progress(
             detail=analysis_result["message"]
         )
     
-    return analysis_result
+    # Use JSONResponse with custom encoder to handle datetime objects
+    return JSONResponse(
+        content=json.loads(json.dumps(analysis_result, cls=DateTimeEncoder))
+    )
 
 @router.post("/adaptive-plan", status_code=status.HTTP_201_CREATED)
 async def create_adaptive_plan(

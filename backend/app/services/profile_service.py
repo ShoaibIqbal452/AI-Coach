@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.profile import UserProfile
 from app.schemas.profile import ProfileCreate, ProfileUpdate
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, Tuple
 
 def get_profile_by_user_id(db: Session, user_id: int) -> Optional[UserProfile]:
     """
@@ -64,3 +64,32 @@ def delete_profile(db: Session, user_id: int) -> Dict[str, Any]:
     db.delete(db_profile)
     db.commit()
     return {"success": True, "message": "Profile deleted successfully"}
+
+def get_or_create_profile(db: Session, user_id: int) -> Tuple[UserProfile, bool]:
+    """
+    Get a user's profile by user ID or create a default one if it doesn't exist
+    Returns a tuple of (profile, created) where created is a boolean indicating if a new profile was created
+    """
+    profile = get_profile_by_user_id(db, user_id)
+    
+    if profile:
+        return profile, False
+    
+    # Create a default profile
+    default_profile = UserProfile(
+        user_id=user_id,
+        height=0,
+        weight=0,
+        age=0,
+        fitness_level="beginner",
+        fitness_goal="general_fitness",
+        dietary_preferences="",
+        workout_preferences="",
+        available_equipment="",
+        health_conditions=""
+    )
+    
+    db.add(default_profile)
+    db.commit()
+    db.refresh(default_profile)
+    return default_profile, True

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any
 from app.db.session import SessionLocal
 from app.schemas.profile import ProfileCreate, ProfileUpdate, ProfileResponse
-from app.services.profile_service import get_profile_by_user_id, create_profile, update_profile, delete_profile
+from app.services.profile_service import get_profile_by_user_id, create_profile, update_profile, delete_profile, get_or_create_profile
 from app.api.v1.routes.chat import get_current_user
 from app.models.user import User
 
@@ -19,12 +19,12 @@ def get_db():
 @router.get("/me", response_model=ProfileResponse)
 async def get_my_profile(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
-    Get the current user's profile
+    Get the current user's profile or create a default one if it doesn't exist
     """
-    profile = get_profile_by_user_id(db, user_id=current_user.id)
+    profile, created = get_or_create_profile(db, user_id=current_user.id)
     
-    if not profile:
-        raise HTTPException(status_code=404, detail="Profile not found")
+    if created:
+        print(f"Created new default profile for user {current_user.id}")
     
     return profile
 

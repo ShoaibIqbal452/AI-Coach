@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import json
+from app.utils.json_encoder import DateTimeEncoder
 
 from app.models.progress import Progress
 from app.models.profile import UserProfile
@@ -35,8 +36,25 @@ def analyze_progress_data(db: Session, user_id: int, days: int = 30) -> Dict[str
         if trend_data and trend_data.get("data"):
             trends[metric] = trend_data
     
+    # Convert UserProfile to dictionary manually
+    user_profile_dict = {}
+    if user_profile:
+        user_profile_dict = {
+            "id": user_profile.id,
+            "user_id": user_profile.user_id,
+            "height": user_profile.height,
+            "weight": user_profile.weight,
+            "age": user_profile.age,
+            "fitness_level": user_profile.fitness_level,
+            "fitness_goal": user_profile.fitness_goal,
+            "dietary_preferences": user_profile.dietary_preferences,
+            "workout_preferences": user_profile.workout_preferences,
+            "available_equipment": user_profile.available_equipment,
+            "health_conditions": user_profile.health_conditions
+        }
+    
     analysis_data = {
-        "user_profile": user_profile.to_dict() if user_profile else {},
+        "user_profile": user_profile_dict,
         "progress_entries": [
             {
                 "date": entry.date.isoformat(),
@@ -97,7 +115,7 @@ def analyze_progress_data(db: Session, user_id: int, days: int = 30) -> Dict[str
                     }
                 }
                 """},
-                {"role": "user", "content": f"Here is my progress data for analysis: {json.dumps(analysis_data)}"}
+                {"role": "user", "content": f"Here is my progress data for analysis: {json.dumps(analysis_data, cls=DateTimeEncoder)}"}
             ],
             temperature=0.7,
             max_tokens=1500
@@ -139,8 +157,25 @@ def generate_adaptive_plan(
     if original_plan_id:
         original_plan = db.query(Plan).filter(Plan.id == original_plan_id).first()
     
+    # Convert UserProfile to dictionary manually
+    user_profile_dict = {}
+    if user_profile:
+        user_profile_dict = {
+            "id": user_profile.id,
+            "user_id": user_profile.user_id,
+            "height": user_profile.height,
+            "weight": user_profile.weight,
+            "age": user_profile.age,
+            "fitness_level": user_profile.fitness_level,
+            "fitness_goal": user_profile.fitness_goal,
+            "dietary_preferences": user_profile.dietary_preferences,
+            "workout_preferences": user_profile.workout_preferences,
+            "available_equipment": user_profile.available_equipment,
+            "health_conditions": user_profile.health_conditions
+        }
+    
     plan_data = {
-        "user_profile": user_profile.to_dict() if user_profile else {},
+        "user_profile": user_profile_dict,
         "progress_entries": [
             {
                 "date": entry.date.isoformat(),
@@ -179,7 +214,7 @@ def generate_adaptive_plan(
                 
                 Format your response as a complete {plan_type} plan with clear sections and instructions.
                 """},
-                {"role": "user", "content": f"Here is my data for creating an adaptive {plan_type} plan: {json.dumps(plan_data)}"}
+                {"role": "user", "content": f"Here is my data for creating an adaptive {plan_type} plan: {json.dumps(plan_data, cls=DateTimeEncoder)}"}
             ],
             temperature=0.7,
             max_tokens=2000
